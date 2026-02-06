@@ -13,7 +13,11 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
+  Linking,
 } from "react-native";
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 import { PATH_URL_BACKEND, PATH_DOCUMENTS } from "../../constants/api";
 import i18n from "../../i18n";
 import { eventEmitter } from "../../utils/EventEmitter";
@@ -94,6 +98,48 @@ export default function TicketsScreen() {
     } catch (error) {
       console.error("Error al cargar archivos:", error);
       setTicketFiles([]);
+    }
+  };
+
+  const handleImagePress = async (fileId: string, fileName: string) => {
+    const imageUrl = `${PATH_DOCUMENTS}/files/download/${fileId}`;
+    
+    Alert.alert(
+      fileName,
+      'Selecciona una opción',
+      [
+        {
+          text: 'Ver imagen',
+          onPress: () => Linking.openURL(imageUrl)
+        },
+        {
+          text: 'Descargar',
+          onPress: () => downloadFile(imageUrl, fileName)
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
+  const downloadFile = async (url: string, fileName: string) => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso denegado', 'Se necesita permiso para guardar archivos');
+        return;
+      }
+
+      const fileUri = FileSystem.documentDirectory + fileName;
+      const downloadResult = await FileSystem.downloadAsync(url, fileUri);
+      const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
+      await MediaLibrary.createAlbumAsync('PSS Mobile', asset, false);
+
+      Alert.alert('Éxito', 'Archivo descargado correctamente');
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo descargar el archivo');
     }
   };
 
@@ -283,7 +329,10 @@ export default function TicketsScreen() {
           <View style={styles.detailModalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{i18n.t('customerTicket.ticketDetail')}</Text>
-              <TouchableOpacity onPress={() => setShowDetailModal(false)}>
+              <TouchableOpacity onPress={() => {
+                setShowDetailModal(false);
+                setTicketFiles([]);
+              }}>
                 <Ionicons name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
@@ -362,7 +411,12 @@ export default function TicketsScreen() {
                       <Text style={styles.detailLabel}>Archivos Adjuntos:</Text>
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filesScroll}>
                         {ticketFiles.map((file: any, index: number) => (
-                          <TouchableOpacity key={index} style={styles.filePreview}>
+                          <TouchableOpacity 
+                            key={index} 
+                            style={styles.filePreview}
+                            onPress={() => handleImagePress(file.id, file.fileNameOriginal)}
+                            activeOpacity={0.7}
+                          >
                             {file.fileType?.startsWith('image/') ? (
                               <Image 
                                 source={{ uri: `${PATH_DOCUMENTS}/files/download/${file.id}` }} 

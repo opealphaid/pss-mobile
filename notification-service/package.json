@@ -1,0 +1,30 @@
+{
+  "name": "pss-notification-service",
+  "version": "1.0.0",
+  "description": "Servicio de notificaciones push para PSS Mobile",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server-mongoose.js",
+    "start:mongo": "node server.js",
+    "start:memory": "node server-memory.js",
+    "start:win": "start.bat",
+    "dev": "nodemon server-mongoose.js",
+    "init-db": "node init-db.js",
+    "test-connection": "node test-connection.js",
+    "list-tokens": "node list-tokens.js",
+    "users": "node get-users.js",
+    "test": "node test-send.js",
+    "send-all": "node send-to-all.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "expo-server-sdk": "^3.7.0",
+    "express": "^4.18.2",
+    "mongodb": "^5.9.0",
+    "mongoose": "^9.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

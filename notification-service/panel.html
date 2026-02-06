@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Notificaciones - PSS Mobile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .header {
+            background: #002B5B;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #002B5B;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            background: #002B5B;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #003d7a;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .users-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .user-item {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .user-item:hover {
+            background: #f5f5f5;
+            border-color: #002B5B;
+        }
+        .user-item.selected {
+            background: #e3f2fd;
+            border-color: #002B5B;
+        }
+        .user-id {
+            font-weight: bold;
+            color: #002B5B;
+        }
+        .user-email {
+            color: #666;
+            font-size: 13px;
+        }
+        .user-device {
+            color: #999;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+            font-size: 14px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .refresh-btn {
+            background: #28a745;
+            margin-bottom: 15px;
+        }
+        .refresh-btn:hover {
+            background: #218838;
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 Panel de Notificaciones PSS Mobile</h1>
+        <p>Envía notificaciones push a tus usuarios</p>
+    </div>
+
+    <div class="container">
+        <!-- Lista de Usuarios -->
+        <div class="card">
+            <h2>👥 Usuarios Conectados</h2>
+            <button class="refresh-btn" onclick="loadUsers()">🔄 Actualizar Lista</button>
+            <div id="usersList" class="users-list">
+                <div class="loading">Cargando usuarios...</div>
+            </div>
+        </div>
+
+        <!-- Formulario de Notificación -->
+        <div class="card">
+            <h2>✉️ Enviar Notificación</h2>
+            <form id="notificationForm">
+                <div class="form-group">
+                    <label for="userId">ID de Usuario *</label>
+                    <input type="text" id="userId" required placeholder="Selecciona un usuario o ingresa el ID">
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Título *</label>
+                    <input type="text" id="title" required placeholder="Ej: Nuevo Ticket Asignado">
+                </div>
+
+                <div class="form-group">
+                    <label for="body">Mensaje *</label>
+                    <textarea id="body" required placeholder="Ej: Ticket #456 requiere tu atención"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="ticketId">ID de Ticket (opcional)</label>
+                    <input type="text" id="ticketId" placeholder="Ej: 456">
+                </div>
+
+                <div class="form-group">
+                    <label for="notificationType">Tipo</label>
+                    <select id="notificationType">
+                        <option value="new_ticket">Nuevo Ticket</option>
+                        <option value="status_change">Cambio de Estado</option>
+                        <option value="new_comment">Nuevo Comentario</option>
+                        <option value="reminder">Recordatorio</option>
+                        <option value="assignment">Asignación</option>
+                        <option value="general">General</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="sendBtn">📤 Enviar Notificación</button>
+            </form>
+
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001/api';
+        let selectedUserId = null;
+
+        // Cargar usuarios al iniciar
+        loadUsers();
+
+        async function loadUsers() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '<div class="loading">Cargando usuarios...</div>';
+
+            try {
+                const response = await fetch(`${API_URL}/notifications/users`);
+                const users = await response.json();
+
+                if (users.length === 0) {
+                    usersList.innerHTML = '<div class="loading">No hay usuarios registrados. Los usuarios deben iniciar sesión en la app primero.</div>';
+                    return;
+                }
+
+                usersList.innerHTML = users.map(user => `
+                    <div class="user-item" onclick="selectUser('${user.userId}', '${user.email}')">
+                        <div class="user-id">ID: ${user.userId}</div>
+                        <div class="user-email">${user.email}</div>
+                        <div class="user-device">📱 ${user.deviceInfo?.platform || 'N/A'} - ${user.deviceInfo?.model || 'N/A'}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                usersList.innerHTML = '<div class="loading">❌ Error al cargar usuarios. Verifica que el servidor esté corriendo.</div>';
+            }
+        }
+
+        function selectUser(userId, email) {
+            selectedUserId = userId;
+            document.getElementById('userId').value = userId;
+            
+            // Marcar como seleccionado
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        document.getElementById('notificationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const title = document.getElementById('title').value;
+            const body = document.getElementById('body').value;
+            const ticketId = document.getElementById('ticketId').value;
+            const type = document.getElementById('notificationType').value;
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const resultDiv = document.getElementById('result');
+            
+            sendBtn.disabled = true;
+            sendBtn.textContent = '⏳ Enviando...';
+            resultDiv.style.display = 'none';
+
+            try {
+                const data = { type };
+                if (ticketId) data.ticketId = ticketId;
+
+                const response = await fetch(`${API_URL}/notifications/send`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, title, body, data })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ Notificación enviada exitosamente';
+                    // Limpiar solo los campos de mensaje
+                    document.getElementById('title').value = '';
+                    document.getElementById('body').value = '';
+                    document.getElementById('ticketId').value = '';
+                } else {
+                    throw new Error(result.error || 'Error desconocido');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                resultDiv.style.display = 'block';
+                sendBtn.disabled = false;
+                sendBtn.textContent = '📤 Enviar Notificación';
+            }
+        });
+    </script>
+</body>
+</html>

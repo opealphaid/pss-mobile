@@ -17,6 +17,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PATH_URL_BACKEND } from '../constants/api';
 import LanguageSelector from '../components/LanguageSelector';
+import { registerForPushNotificationsAsync } from '../utils/registerForPushNotificationsAsync';
+import { notificationService } from '../services/notifications';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -65,6 +67,14 @@ export default function LoginScreen() {
         ['email', user.email],
         ['userRole', user.rol],
       ]);
+
+      // Registrar token de notificaciones
+      try {
+        const token = await registerForPushNotificationsAsync();
+        console.log('✅ Token obtenido:', token);
+      } catch (error) {
+        console.log('⚠️ No se pudo obtener token:', error);
+      }
 
       console.log('Datos guardados, redirigiendo...');
       setLoading(false);

@@ -8,18 +8,42 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "icon": "./assets/images/logo.png",
+    "notification": {
+      "icon": "./assets/images/logo.png",
+      "color": "#002B5B"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.alphasistemas.pssmobile",
+      "icon": "./assets/images/logo.png",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "audio",
+          "fetch",
+          "remote-notification"
+        ],
+        "NSCameraUsageDescription": "Necesitamos acceso a la cámara para activar la linterna en notificaciones urgentes"
       }
     },
     "android": {
       "package": "com.alphasistemas.pssmobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#002B5B"
+      },
       "permissions": [
         "android.permission.VIBRATE",
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.CAMERA",
+        "android.permission.FLASHLIGHT",
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_NOTIFICATION_POLICY"
       ]
     },
     "web": {},
@@ -29,9 +53,14 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/images/logo.png",
           "color": "#002B5B",
-          "enableBackgroundRemoteNotifications": true
+          "enableBackgroundRemoteNotifications": true,
+          "sounds": ["./assets/alarm.mp3"]
         }
+      ],
+      [
+        "expo-task-manager"
       ]
     ],
     "extra": {
