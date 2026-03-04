@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Animated, Alert, Image } from 'react-native';
 import { useNotification } from '@/context/NotificationContext';
@@ -24,6 +25,9 @@ export default function NotificationsScreen() {
     const newNotifications = localNotifications.filter((_, i) => i !== index);
     setLocalNotifications(newNotifications);
     await AsyncStorage.setItem('notifications', JSON.stringify(newNotifications));
+    
+    // Detener alarma si se borra una notificación
+    stopAlarm();
   };
 
   const deleteAll = () => {
@@ -38,6 +42,7 @@ export default function NotificationsScreen() {
           onPress: async () => {
             setLocalNotifications([]);
             await AsyncStorage.setItem('notifications', JSON.stringify([]));
+            stopAlarm();
           },
         },
       ]

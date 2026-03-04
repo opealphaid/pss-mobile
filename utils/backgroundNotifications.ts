@@ -2,10 +2,10 @@ import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
+import { Platform } from 'react-native';
 
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
 
-// Configurar cómo se manejan las notificaciones
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
     const data = notification.request.content.data;
@@ -20,7 +20,6 @@ Notifications.setNotificationHandler({
   },
 });
 
-// Definir tarea en background
 TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => {
   if (error) {
     console.error('Error en tarea background:', error);
@@ -31,7 +30,6 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
     const notification = data as any;
     const notificationData = notification.notification?.request?.content?.data;
 
-    // Si es urgente, reproducir alarma incluso en background
     if (notificationData?.alarm || notificationData?.type === 'urgent') {
       try {
         await Audio.setAudioModeAsync({
@@ -52,12 +50,10 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
           }
         );
 
-        // Vibrar intensamente
         const vibrateInterval = setInterval(() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         }, 500);
 
-        // Detener después de 60 segundos si no se interactúa
         setTimeout(async () => {
           clearInterval(vibrateInterval);
           await sound.stopAsync();
@@ -66,12 +62,12 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
 
       } catch (error) {
         console.log('Error reproduciendo alarma en background:', error);
+        // Continuar sin sonido
       }
     }
   }
 });
 
-// Registrar tarea en background
 export async function registerBackgroundNotificationTask() {
   try {
     await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);

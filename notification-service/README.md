@@ -25,6 +25,7 @@ La app automáticamente registra el token cuando el usuario inicia sesión.
 
 ## 🧪 Probar Notificaciones
 
+### Notificación Normal
 1. Inicia la app móvil y haz login
 2. Copia el `userId` de la consola
 3. Ejecuta:
@@ -36,6 +37,25 @@ node test-send.js <userId>
 Ejemplo:
 ```bash
 node test-send.js 123
+```
+
+### 🚨 Notificación Urgente (con Linterna)
+Para probar notificaciones con sonido continuo, vibración y linterna:
+
+```bash
+node test-urgent-flashlight.js
+```
+
+Esto enviará una notificación urgente al primer usuario registrado con:
+- ✅ Sonido en loop continuo
+- ✅ Vibración intensa cada 500ms
+- ✅ **Linterna parpadeando cada 500ms**
+
+### Panel Web
+Abre `panel.html` en tu navegador para una interfaz gráfica:
+```bash
+start panel.html  # Windows
+open panel.html   # macOS
 ```
 
 ## 🔌 Endpoints API
@@ -58,7 +78,26 @@ Body: {
   userId: string,
   title: string,
   body: string,
-  data?: object
+  data?: {
+    type?: string,
+    ticketId?: string,
+    alarm?: boolean,  // true para activar sonido continuo + vibración + linterna
+    timestamp?: string
+  }
+}
+```
+
+**Ejemplo de notificación urgente:**
+```json
+{
+  "userId": "123",
+  "title": "🚨 ALERTA URGENTE",
+  "body": "Ticket crítico requiere atención inmediata",
+  "data": {
+    "type": "urgent",
+    "alarm": true,
+    "ticketId": "456"
+  }
 }
 ```
 
@@ -82,12 +121,12 @@ GET /api/notifications/history/:userId
 
 Agrega estas rutas a tu backend principal en `pss.alphasys.com.bo/bck`:
 
+### Notificación Normal
 ```javascript
 // Ejemplo: Enviar notificación cuando se asigna un ticket
 app.post('/tickets/assign', async (req, res) => {
   // ... lógica de asignación ...
   
-  // Enviar notificación
   await fetch('http://localhost:3001/api/notifications/send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -96,6 +135,29 @@ app.post('/tickets/assign', async (req, res) => {
       title: 'Nuevo Ticket Asignado',
       body: `Ticket #${ticketId} requiere tu atención`,
       data: { ticketId, type: 'assignment' }
+    })
+  });
+});
+```
+
+### Notificación Urgente (con Linterna)
+```javascript
+// Ejemplo: Ticket crítico con alarma y linterna
+app.post('/tickets/urgent', async (req, res) => {
+  // ... lógica ...
+  
+  await fetch('http://localhost:3001/api/notifications/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: tecnicoId,
+      title: '🚨 ALERTA URGENTE',
+      body: `Ticket crítico #${ticketId} - Atención inmediata`,
+      data: { 
+        ticketId, 
+        type: 'urgent',
+        alarm: true  // Activa sonido continuo + vibración + linterna
+      }
     })
   });
 });

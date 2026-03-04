@@ -68,17 +68,22 @@ export default function LoginScreen() {
         ['userRole', user.rol],
       ]);
 
-      // Registrar token de notificaciones
-      try {
-        const token = await registerForPushNotificationsAsync();
-        console.log('✅ Token obtenido:', token);
-      } catch (error) {
-        console.log('⚠️ No se pudo obtener token:', error);
-      }
-
       console.log('Datos guardados, redirigiendo...');
       setLoading(false);
       router.replace('/(tabs)/home');
+
+      // Registrar token de notificaciones en background (no bloquea el login)
+      registerForPushNotificationsAsync()
+        .then(async (token) => {
+          console.log('✅ Token obtenido:', token);
+          if (token) {
+            await notificationService.registerToken(token);
+            console.log('✅ Token registrado en servidor');
+          }
+        })
+        .catch((error) => {
+          console.log('⚠️ No se pudo registrar token:', error);
+        });
       
     } catch (error: any) {
       console.error('Error en login:', error);

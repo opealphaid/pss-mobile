@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
@@ -16,7 +18,7 @@ import {
   Alert,
   Linking,
 } from "react-native";
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as MediaLibrary from 'expo-media-library';
 import { PATH_URL_BACKEND, PATH_DOCUMENTS } from "../../constants/api";
 import i18n from "../../i18n";
@@ -132,7 +134,7 @@ export default function TicketsScreen() {
         return;
       }
 
-      const fileUri = FileSystem.documentDirectory + fileName;
+      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
       const downloadResult = await FileSystem.downloadAsync(url, fileUri);
       const asset = await MediaLibrary.createAssetAsync(downloadResult.uri);
       await MediaLibrary.createAlbumAsync('PSS Mobile', asset, false);
